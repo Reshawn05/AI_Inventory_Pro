@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System - Enterprise Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Header Navigation -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Inventory Pro</h1>
+                    <span>Enterprise Inventory Management System</span>
+                </div>
+            </div>
+
+            <!-- Domain-Centric Navigation -->
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="dashboard-tab">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </button>
+                <button class="nav-tab" data-tab="products-tab">
+                    <i class="fa-solid fa-box"></i> Products
+                </button>
+                <button class="nav-tab" data-tab="reports-tab">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Reports
+                </button>
+                <button class="nav-tab" data-tab="warehouse-tab">
+                    <i class="fa-solid fa-warehouse"></i> Warehouse
+                </button>
+                <button class="nav-tab" data-tab="assistant-tab">
+                    <i class="fa-solid fa-robot"></i> AI Assistant
+                </button>
+            </nav>
+
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+
+            <!-- TAB 1: DASHBOARD -->
+            <section id="dashboard-tab" class="tab-content active">
+                <!-- KPI Metric Cards Grid -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon total-value">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Total Stock Valuation</span>
+                            <h2 class="kpi-value" id="kpi-total-val">₹0.00</h2>
+                            <span class="kpi-subtext">Real-time asset value</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon total-items">
+                            <i class="fa-solid fa-boxes-packing"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Total Unique Products</span>
+                            <h2 class="kpi-value" id="kpi-total-items">0</h2>
+                            <span class="kpi-subtext" id="kpi-total-qty">0 total units in stock</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon low-stock">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Low Stock Alerts</span>
+                            <h2 class="kpi-value warning" id="kpi-low-stock">0</h2>
+                            <span class="kpi-subtext warning-text"><i class="fa-solid fa-bell"></i> Action required</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon categories">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Active Categories</span>
+                            <h2 class="kpi-value" id="kpi-categories">0</h2>
+                            <span class="kpi-subtext">Product departments</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions & Highlights -->
+                <div class="dashboard-banner">
+                    <div class="banner-text">
+                        <h3><i class="fa-solid fa-bolt"></i> Fast Operations</h3>
+                        <p>Manage product stock levels, view regional warehouse capacity, or interact with your AI assistant.</p>
+                    </div>
+                    <div class="banner-actions">
+                        <button class="btn btn-primary" id="dash-btn-add-product">
+                            <i class="fa-solid fa-plus"></i> Add Product
+                        </button>
+                        <button class="btn btn-outline" id="dash-btn-view-warehouse">
+                            <i class="fa-solid fa-warehouse"></i> Warehouse Overview
+                        </button>
+                        <button class="btn btn-secondary" id="dash-btn-open-ai">
+                            <i class="fa-solid fa-robot"></i> Ask Assistant
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Low Stock Attention List -->
+                <div class="card shadow-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i> Stock Reorder Highlights</h3>
+                        <button class="btn btn-sm btn-outline" id="btn-goto-products">View All Products</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Current Stock</th>
+                                    <th>Min Threshold</th>
+                                    <th>Storage Location</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-low-stock-body">
+                                <tr>
+                                    <td colspan="7" class="loading-state">
+                                        <i class="fa-solid fa-spinner fa-spin"></i> Checking inventory levels...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: PRODUCTS -->
+            <section id="products-tab" class="tab-content">
+                <!-- Control Toolbar -->
+                <div class="table-controls">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="products-search-input" placeholder="Search product name, SKU, category, or location...">
+                        <button class="btn-clear" id="btn-clear-search" style="display:none;"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <div class="filter-group">
+                        <select id="filter-category" class="select-filter">
+                            <option value="">All Categories</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Office Furniture">Office Furniture</option>
+                            <option value="Supplies">Supplies</option>
+                            <option value="Accessories">Accessories</option>
+                        </select>
+
+                        <button class="btn btn-outline" id="btn-filter-low-stock">
+                            <i class="fa-solid fa-filter"></i> Low Stock Only
+                        </button>
+
+                        <button class="btn btn-primary" id="btn-open-add-modal">
+                            <i class="fa-solid fa-plus"></i> Add Product
+                        </button>
+
+                        <button class="btn btn-secondary" id="btn-refresh-inventory" title="Refresh Products">
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Products Table Card -->
+                <div class="card table-card">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>SKU</th>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Unit Price (INR ₹)</th>
+                                    <th>Stock Qty</th>
+                                    <th>Threshold</th>
+                                    <th>Location</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-table-body">
+                                <tr>
+                                    <td colspan="9" class="loading-state">
+                                        <i class="fa-solid fa-spinner fa-spin"></i> Loading inventory products...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: REPORTS -->
+            <section id="reports-tab" class="tab-content">
+                <div class="reports-header-card card">
+                    <div class="reports-header-text">
+                        <h2><i class="fa-solid fa-file-invoice-dollar"></i> Executive Inventory Summary Report</h2>
+                        <p>Structured asset valuation and stock distribution metrics, updated in real-time.</p>
+                    </div>
+                    <button class="btn btn-primary" id="btn-refresh-reports"><i class="fa-solid fa-arrows-rotate"></i> Refresh Report</button>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="card report-kpi-card">
+                        <span class="report-label">Total Asset Valuation</span>
+                        <h2 class="report-val" id="report-valuation">₹0.00</h2>
+                        <span class="report-sub">Combined market value</span>
+                    </div>
+
+                    <div class="card report-kpi-card">
+                        <span class="report-label">Total Stock Count</span>
+                        <h2 class="report-val" id="report-total-units">0 Units</h2>
+                        <span class="report-sub">Physical items stored</span>
+                    </div>
+
+                    <div class="card report-kpi-card">
+                        <span class="report-label">Active SKUs</span>
+                        <h2 class="report-val" id="report-skus">0 SKUs</h2>
+                        <span class="report-sub">Catalog product count</span>
+                    </div>
+
+                    <div class="card report-kpi-card">
+                        <span class="report-label">Reorder Warnings</span>
+                        <h2 class="report-val warning-text" id="report-warnings">0 Alerts</h2>
+                        <span class="report-sub">Below min threshold</span>
+                    </div>
+                </div>
+
+                <div class="card margin-top-card">
+                    <h3><i class="fa-solid fa-chart-bar"></i> Category Stock Distribution</h3>
+                    <div id="category-distribution-container" class="category-dist-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: WAREHOUSE -->
+            <section id="warehouse-tab" class="tab-content">
+                <div class="warehouse-header card">
+                    <div>
+                        <h2><i class="fa-solid fa-warehouse"></i> Warehouse Overview</h2>
+                        <p>Regional fulfillment centers and capacity utilization, updated in real-time.</p>
+                    </div>
+                    <button class="btn btn-secondary" id="btn-refresh-warehouse"><i class="fa-solid fa-rotate"></i> Refresh Facilities</button>
+                </div>
+
+                <div class="warehouse-grid" id="warehouse-cards-container">
+                    <div class="loading-state style-padding">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Fetching warehouse locations...
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: AI ASSISTANT -->
+            <section id="assistant-tab" class="tab-content">
+                <div class="assistant-container card">
+                    <div class="assistant-header">
+                        <div class="assistant-title">
+                            <div class="assistant-avatar">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div>
+                                <h2>Smart Inventory AI Assistant</h2>
+                            </div>
+                        </div>
+                        <span class="badge badge-success"><i class="fa-solid fa-circle"></i> Online</span>
+                    </div>
+
+                    <div class="quick-prompts">
+                        <span class="prompt-label">Quick Suggestions:</span>
+                        <button class="chip-btn" data-prompt="Which products need restocking?">
+                            <i class="fa-solid fa-cart-shopping"></i> Restock Analysis
+                        </button>
+                        <button class="chip-btn" data-prompt="Generate an inventory audit for all locations">
+                            <i class="fa-solid fa-clipboard-check"></i> Inventory Audit
+                        </button>
+                        <button class="chip-btn" data-prompt="Show me the inventory health status">
+                            <i class="fa-solid fa-heart-pulse"></i> Inventory Health
+                        </button>
+                        <button class="chip-btn" data-prompt="Search for keyboard in inventory">
+                            <i class="fa-solid fa-magnifying-glass"></i> Search Keyboards
+                        </button>
+                    </div>
+
+                    <!-- Chat Messages Window -->
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-message assistant">
+                            <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                            <div class="msg-content">
+                                <p>Hello! I am your AI Inventory Assistant. How can I help you today?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input Form -->
+                    <form id="chat-form" class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Type a message or request (e.g. 'Show low stock items', 'Goa warehouse')..." autocomplete="off">
+                        <button type="submit" class="btn btn-primary" id="btn-send-chat">
+                            <i class="fa-solid fa-paper-plane"></i> Send
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL: ADD PRODUCT -->
+    <div class="modal-backdrop" id="add-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-plus-circle"></i> Add New Product</h3>
+                <button class="icon-btn modal-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="add-product-form" class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add-sku">SKU Identifier *</label>
+                        <input type="text" id="add-sku" placeholder="e.g. ELEC-9900" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-name">Product Name *</label>
+                        <input type="text" id="add-name" placeholder="e.g. Wireless Ergonomic Mouse" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add-category">Category *</label>
+                        <select id="add-category" required>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Office Furniture">Office Furniture</option>
+                            <option value="Supplies">Supplies</option>
+                            <option value="Accessories">Accessories</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-price">Unit Price (INR ₹) *</label>
+                        <input type="number" step="0.01" min="0.01" id="add-price" placeholder="2499.00" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add-qty">Initial Stock Quantity</label>
+                        <input type="number" min="0" id="add-qty" value="25" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-threshold">Reorder Threshold</label>
+                        <input type="number" min="0" id="add-threshold" value="10" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="add-location">Warehouse Location</label>
+                    <input type="text" id="add-location" value="Goa Warehouse - Aisle A1">
+                </div>
+
+                <div class="form-group">
+                    <label for="add-desc">Description</label>
+                    <textarea id="add-desc" rows="2" placeholder="Optional product description"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT PRODUCT -->
+    <div class="modal-backdrop" id="edit-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square"></i> Edit Product Stock & Details</h3>
+                <button class="icon-btn modal-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="edit-product-form" class="modal-body">
+                <input type="hidden" id="edit-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>SKU (Read Only)</label>
+                        <input type="text" id="edit-sku" disabled class="input-disabled">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-name">Product Name</label>
+                        <input type="text" id="edit-name" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-category">Category</label>
+                        <select id="edit-category" required>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Office Furniture">Office Furniture</option>
+                            <option value="Supplies">Supplies</option>
+                            <option value="Accessories">Accessories</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-price">Unit Price (INR ₹)</label>
+                        <input type="number" step="0.01" min="0.01" id="edit-price" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-qty">Current Stock Quantity</label>
+                        <input type="number" min="0" id="edit-qty" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-threshold">Min Stock Threshold</label>
+                        <input type="number" min="0" id="edit-threshold" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-location">Warehouse Location</label>
+                    <input type="text" id="edit-location" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-desc">Description</label>
+                    <textarea id="edit-desc" rows="2"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                    <button type="submit" class="btn btn-success"><i class="fa-solid fa-check"></i> Update Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

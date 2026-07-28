@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "inventory-management": {
+      "command": "python",
+      "args": [
+        "-m",
+        "python_src.server"
+      ],
+      "cwd": "a:/Work/MCP"
+    }
+  }
+}
