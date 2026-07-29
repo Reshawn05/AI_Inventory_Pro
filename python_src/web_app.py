@@ -14,7 +14,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 import uvicorn
 
 try:
-    from python_src.database import (
+    from python_src.Database.database import (
         init_db,
         list_items,
         get_item_by_id,
@@ -23,12 +23,14 @@ try:
         add_item,
         update_item,
         delete_item,
-        get_inventory_summary
+        get_inventory_summary,
+        get_inventory_logs,
+        bulk_update_items
     )
-    import python_src.server as server_module
-    from python_src.gemini_service import get_gemini_service
+    import python_src.MCP.server as server_module
+    from python_src.MCP.gemini_service import get_gemini_service
 except ImportError:
-    from database import (
+    from Database.database import (
         init_db,
         list_items,
         get_item_by_id,
@@ -37,10 +39,12 @@ except ImportError:
         add_item,
         update_item,
         delete_item,
-        get_inventory_summary
+        get_inventory_summary,
+        get_inventory_logs,
+        bulk_update_items
     )
-    import server as server_module
-    from gemini_service import get_gemini_service
+    import MCP.server as server_module
+    from MCP.gemini_service import get_gemini_service
 
 # Initialise the Gemini service once at startup (singleton).
 # Logs a warning and sets available=False if GEMINI_API_KEY is not configured.
@@ -67,8 +71,8 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"success": False, "detail": "An internal server error occurred."}
     )
 
-# Ensure DB is initialized with fresh INR seed data
-init_db(reset_seed=True)
+# Ensure DB is initialized without wiping existing data
+init_db(reset_seed=False)
 
 # Path to static directory
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
@@ -313,6 +317,22 @@ async def api_invoke_prompt(prompt_name: str, request: Request):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/logs")
+def api_get_logs(limit: int = 50):
+    """Retrieve audit history logs of stock actions."""
+    logs = get_inventory_logs(limit=limit)
+    return {"success": True, "count": len(logs), "logs": logs}
+
+@app.post("/api/bulk-update")
+async def api_bulk_update(request: Request):
+    """Batch update multiple inventory items."""
+    body = await request.json()
+    updates_list = body.get("updates", [])
+    if not isinstance(updates_list, list) or not updates_list:
+        raise HTTPException(status_code=400, detail="Invalid updates payload. Expected non-empty array 'updates'.")
+    res = bulk_update_items(updates_list)
+    return res
 
 def start():
     uvicorn.run(

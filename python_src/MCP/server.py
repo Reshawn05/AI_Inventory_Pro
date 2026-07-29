@@ -7,14 +7,14 @@ import logging
 from functools import wraps
 from typing import Optional, Dict, Any, List
 
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from mcp.server.fastmcp import FastMCP
 
 try:
-    from python_src.database import (
+    from python_src.Database.database import (
         init_db,
         list_items,
         get_item_by_id,
@@ -26,10 +26,12 @@ try:
         get_inventory_summary,
         get_warehouse_locations_summary,
         get_inventory_summary_clean,
-        get_warehouse_locations_minimal_summary
+        get_warehouse_locations_minimal_summary,
+        get_inventory_logs,
+        bulk_update_items
     )
 except ImportError:
-    from database import (
+    from Database.database import (
         init_db,
         list_items,
         get_item_by_id,
@@ -41,13 +43,15 @@ except ImportError:
         get_inventory_summary,
         get_warehouse_locations_summary,
         get_inventory_summary_clean,
-        get_warehouse_locations_minimal_summary
+        get_warehouse_locations_minimal_summary,
+        get_inventory_logs,
+        bulk_update_items
     )
 
 # Initialize FastMCP Server
 mcp = FastMCP(
     name="Inventory Management System",
-    instructions="MCP Server providing 5 core inventory management capabilities: Data Retrieval, Search, Insert, Update, and Delete."
+    instructions="MCP Server providing core inventory management capabilities: Data Retrieval, Search, Insert, Update, Delete, and Bulk Updates."
 )
 
 # Setup logger for MCP Tool execution and server observability (Console + File)
@@ -119,15 +123,19 @@ def get_inventory_details(
     item_id: Optional[int] = None,
     sku: Optional[str] = None,
     category: Optional[str] = None,
-    low_stock_only: bool = False
+    low_stock_only: bool = False,
+    limit: int = 50,
+    offset: int = 0
 ) -> str:
-    """1. Data Retrieval Tool: Fetch inventory records or specific product details in INR (₹).
+    """1. Data Retrieval Tool: Fetch inventory records or specific product details in INR (₹) with pagination.
 
     Args:
         item_id: Database integer ID to get a specific item.
         sku: Unique SKU code string to get a specific item.
         category: Filter items by category name (e.g. 'Electronics').
         low_stock_only: If True, only returns items where quantity <= min_stock_threshold.
+        limit: Max number of items to return (default 50).
+        offset: Pagination offset starting index (default 0).
 
     Returns:
         JSON string containing single item details or a list of inventory items with overall valuation in INR (₹).
@@ -138,13 +146,15 @@ def get_inventory_details(
             return json.dumps({"error": f"Item not found for item_id={item_id}, sku='{sku}'."}, indent=2)
         return json.dumps({"success": True, "currency": "INR (₹)", "item": item}, indent=2)
 
-    items = list_items(category=category, low_stock_only=low_stock_only)
+    items = list_items(category=category, low_stock_only=low_stock_only, limit=limit, offset=offset)
     summary = get_inventory_summary()
     return json.dumps({
         "success": True,
         "currency": "INR (₹)",
         "count": len(items),
         "total_inventory_value_inr": summary["total_inventory_value"],
+        "limit": limit,
+        "offset": offset,
         "items": items
     }, indent=2)
 
@@ -317,6 +327,27 @@ def delete_inventory_item(item_id: int, confirm: bool = False) -> str:
     else:
         return json.dumps({"error": f"Failed to delete item {item_id}."}, indent=2)
 
+@mcp.tool()
+@log_tool_execution
+def bulk_update_inventory(updates_json: str) -> str:
+    """6. Bulk Update Tool: Batch update stock quantity, price, or details for multiple items atomically.
+
+    Args:
+        updates_json: JSON string representing a list of update objects.
+                      Example: '[{"item_id": 1, "new_quantity": 50}, {"item_id": 2, "unit_price": 12500.0}]'
+
+    Returns:
+        JSON string containing batch update execution summary.
+    """
+    try:
+        updates_list = json.loads(updates_json)
+        if not isinstance(updates_list, list):
+            return json.dumps({"error": "updates_json must be a valid JSON array of update objects."}, indent=2)
+        
+        result = bulk_update_items(updates_list)
+        return json.dumps(result, indent=2)
+    except json.JSONDecodeError as err:
+        return json.dumps({"error": f"Invalid JSON string format: {err}"}, indent=2)
 
 # MCP RESOURCES 
 
